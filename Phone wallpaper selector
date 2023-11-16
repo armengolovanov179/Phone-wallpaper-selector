@@ -1,0 +1,52 @@
+import tkinter as tk
+from tkinter import filedialog
+from PIL import Image, ImageTk
+
+class WallpaperApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Phone Wallpaper Selector")
+
+        self.image_label = tk.Label(root)
+        self.image_label.pack(pady=10)
+
+        self.choose_button = tk.Button(root, text="Choose Wallpaper", command=self.choose_wallpaper)
+        self.choose_button.pack(pady=10)
+
+        self.screen_format_var = tk.StringVar()
+        self.screen_format_var.set("Select Screen Format")
+
+        self.screen_format_menu = tk.OptionMenu(root, self.screen_format_var, "16:9", "18:9", "19.5:9")
+        self.screen_format_menu.pack(pady=10)
+
+    def choose_wallpaper(self):
+        file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.png;*.jpg;*.jpeg")])
+
+        if file_path:
+            self.set_wallpaper(file_path)
+
+    def set_wallpaper(self, file_path):
+        image = Image.open(file_path)
+
+        # Adjust the image based on the selected screen format
+        screen_format = self.screen_format_var.get()
+        if screen_format == "16:9":
+            width, height = 16, 9
+        elif screen_format == "18:9":
+            width, height = 18, 9
+        elif screen_format == "19.5:9":
+            width, height = 19.5, 9
+
+        # Calculate the new height based on the selected width
+        new_height = int((width / image.width) * image.height)
+        image = image.resize((int(width), new_height), Image.ANTIALIAS)
+
+        # Convert the image to a PhotoImage object and display it
+        image = ImageTk.PhotoImage(image)
+        self.image_label.config(image=image)
+        self.image_label.image = image
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = WallpaperApp(root)
+    root.mainloop()
