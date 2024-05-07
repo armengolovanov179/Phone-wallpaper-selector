@@ -13,15 +13,17 @@ class WallpaperApp:
         self.choose_button = tk.Button(root, text="Choose Wallpaper", command=self.choose_wallpaper)
         self.choose_button.pack(pady=10)
 
+        self.screen_formats = {
+            "16:9": (16, 9),
+            "18:9": (18, 9),
+            "19.5:9": (19.5, 9)
+        }
+
         self.screen_format_var = tk.StringVar()
-        self.screen_format_var.set("Select Screen Format")
+        self.screen_format_var.set("16:9")
 
-        screen_formats = ["16:9", "18:9", "19.5:9", "Custom"]
-        self.screen_format_menu = tk.OptionMenu(root, self.screen_format_var, *screen_formats)
+        self.screen_format_menu = tk.OptionMenu(root, self.screen_format_var, *self.screen_formats.keys())
         self.screen_format_menu.pack(pady=10)
-
-        self.save_button = tk.Button(root, text="Save Wallpaper", command=self.save_wallpaper, state=tk.DISABLED)
-        self.save_button.pack(pady=10)
 
     def choose_wallpaper(self):
         file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.png;*.jpg;*.jpeg")])
@@ -30,52 +32,20 @@ class WallpaperApp:
             self.set_wallpaper(file_path)
 
     def set_wallpaper(self, file_path):
-        try:
-            image = Image.open(file_path)
+        image = Image.open(file_path)
 
-            # Adjust the image based on the selected screen format
-            screen_format = self.screen_format_var.get()
-            if screen_format == "16:9":
-                width, height = 16, 9
-            elif screen_format == "18:9":
-                width, height = 18, 9
-            elif screen_format == "19.5:9":
-                width, height = 19.5, 9
-            elif screen_format == "Custom":
-                # Allow the user to enter custom dimensions
-                width = float(input("Enter custom width: "))
-                height = float(input("Enter custom height: "))
-            else:
-                raise ValueError("Invalid screen format")
+        # Adjust the image based on the selected screen format
+        screen_format = self.screen_format_var.get()
+        width, height = self.screen_formats[screen_format]
 
-            # Calculate the new height based on the selected width
-            new_height = int((width / image.width) * image.height)
-            image = image.resize((int(width), new_height), Image.ANTIALIAS)
+        # Calculate the new height based on the selected width
+        new_height = int((width / image.width) * image.height)
+        image = image.resize((int(width), new_height), Image.ANTIALIAS)
 
-            # Convert the image to a PhotoImage object and display it
-            image = ImageTk.PhotoImage(image)
-            self.image_label.config(image=image)
-            self.image_label.image = image
-
-            self.save_button.config(state=tk.NORMAL)  # Enable the save button
-
-        except Exception as e:
-            tk.messagebox.showerror("Error", f"Error loading image: {str(e)}")
-
-    def save_wallpaper(self):
-        try:
-            # Allow the user to choose the location to save the adjusted wallpaper
-            file_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png")])
-
-            if file_path:
-                # Get the current image from the label and save it to the specified location
-                current_image = self.image_label.image
-                current_image.write(file_path)
-                tk.messagebox.showinfo("Success", "Wallpaper saved successfully!")
-
-        except Exception as e:
-            tk.messagebox.showerror("Error", f"Error saving image: {str(e)}")
-
+        # Convert the image to a PhotoImage object and display it
+        image = ImageTk.PhotoImage(image)
+        self.image_label.config(image=image)
+        self.image_label.image = image
 
 if __name__ == "__main__":
     root = tk.Tk()
